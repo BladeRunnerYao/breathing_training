@@ -4,9 +4,10 @@ struct EnsoBreathingView: View {
     let phase: BreathPhase
     let phaseRemaining: Int
     let phaseDuration: Int
+    @Environment(\.zen) private var zen
 
     private var phaseColor: Color {
-        phase == .inhale ? ZenPalette.inhale : ZenPalette.exhale
+        phase == .inhale ? zen.inhale : zen.exhale
     }
 
     var body: some View {
@@ -35,11 +36,11 @@ struct EnsoBreathingView: View {
                 Text(phase == .inhale ? "INHALE" : "EXHALE")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .tracking(3)
-                    .foregroundColor(ZenPalette.textSecondary)
+                    .foregroundColor(zen.textSecondary)
 
                 Text(formatTimer(seconds: phaseRemaining))
                     .font(.system(size: 48, weight: .light, design: .monospaced))
-                    .foregroundColor(ZenPalette.textPrimary)
+                    .foregroundColor(zen.textPrimary)
             }
         }
     }

@@ -4,6 +4,7 @@ struct CalendarMonthView: View {
     @EnvironmentObject private var logStore: LogStore
     @Binding var selectedDate: Date
     private let calendar = Calendar.current
+    @Environment(\.zen) private var zen
 
     var body: some View {
         let monthDates = daysInMonthGrid(for: selectedDate)
@@ -11,7 +12,7 @@ struct CalendarMonthView: View {
             ForEach(weekdaySymbols, id: \.self) { symbol in
                 Text(symbol)
                     .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundColor(ZenPalette.textMuted)
+                    .foregroundColor(zen.textMuted)
             }
 
             ForEach(monthDates, id: \.self) { date in
@@ -28,20 +29,20 @@ struct CalendarMonthView: View {
                 VStack(spacing: 4) {
                     Text("\(calendar.component(.day, from: date))")
                         .font(.system(size: 16, design: .rounded))
-                        .foregroundColor(isSelected ? ZenPalette.gold : ZenPalette.textPrimary)
+                        .foregroundColor(isSelected ? zen.gold : zen.textPrimary)
                         .frame(maxWidth: .infinity)
                     Circle()
-                        .fill(hasLog ? ZenPalette.gold : Color.clear)
+                        .fill(hasLog ? zen.gold : Color.clear)
                         .frame(width: 5, height: 5)
                 }
                 .padding(.vertical, 6)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(isSelected ? ZenPalette.gold.opacity(0.25) : Color.clear)
+                        .fill(isSelected ? zen.gold.opacity(0.25) : Color.clear)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(isSelected ? ZenPalette.gold : Color.clear, lineWidth: 1.5)
+                        .stroke(isSelected ? zen.gold : Color.clear, lineWidth: 1.5)
                 )
                 .onTapGesture {
                     selectedDate = date

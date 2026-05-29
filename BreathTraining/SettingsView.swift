@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var settingsStore: SettingsStore
+    @Environment(\.zen) private var zen
 
     var body: some View {
         NavigationStack {
@@ -14,33 +15,34 @@ struct SettingsView: View {
                                 Text(theme.displayName).tag(theme)
                             }
                         }
-                        .foregroundColor(ZenPalette.textPrimary)
+                        .foregroundColor(zen.textPrimary)
                     } header: {
                         Text("THEME")
                             .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(ZenPalette.textMuted)
+                            .foregroundColor(zen.textMuted)
                             .tracking(1)
                     }
 
                     Section {
-                        Button(role: .destructive) {
+                        Button {
                             settingsStore.reset()
                         } label: {
                             Text("Reset Settings")
+                                .foregroundColor(zen.goldMuted)
                         }
                     } header: {
                         Text("PREFERENCES")
                             .font(.system(size: 13, weight: .medium, design: .rounded))
-                            .foregroundColor(ZenPalette.textMuted)
+                            .foregroundColor(zen.textMuted)
                             .tracking(1)
                     }
                 }
                 .scrollContentBackground(.hidden)
             }
             .navigationTitle("Settings")
-            .toolbarColorScheme(.dark, for: .navigationBar)
+
         }
-        .tint(ZenPalette.gold)
+        .tint(zen.gold)
     }
 
     private var bindingTheme: Binding<AppTheme> {

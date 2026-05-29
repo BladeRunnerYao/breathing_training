@@ -4,6 +4,7 @@ struct TrainingView: View {
     @EnvironmentObject private var settingsStore: SettingsStore
     @EnvironmentObject private var logStore: LogStore
     @StateObject private var engine = BreathingEngine()
+    @Environment(\.zen) private var zen
 
     var body: some View {
         NavigationStack {
@@ -18,8 +19,12 @@ struct TrainingView: View {
                     .padding(20)
                 }
             }
-            .navigationTitle("Breath Training")
-            .toolbarColorScheme(.dark, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    EmptyView()
+                }
+            }
         }
     }
 
@@ -38,23 +43,23 @@ struct TrainingView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Session Remaining")
                         .font(.system(size: 13, design: .rounded))
-                        .foregroundColor(ZenPalette.textSecondary)
+                        .foregroundColor(zen.textSecondary)
                     Text(formatLong(seconds: displaySessionRemaining))
                         .font(.system(size: 24, weight: .medium, design: .rounded))
-                        .foregroundColor(ZenPalette.textPrimary)
+                        .foregroundColor(zen.textPrimary)
                 }
                 Spacer()
                 Rectangle()
-                    .fill(ZenPalette.divider)
+                    .fill(zen.divider)
                     .frame(width: 1, height: 40)
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Group")
                         .font(.system(size: 13, design: .rounded))
-                        .foregroundColor(ZenPalette.textSecondary)
+                        .foregroundColor(zen.textSecondary)
                     Text("\(displayGroupIndex)/\(max(1, settingsStore.settings.groupCount))")
                         .font(.system(size: 24, weight: .medium, design: .rounded))
-                        .foregroundColor(ZenPalette.textPrimary)
+                        .foregroundColor(zen.textPrimary)
                 }
             }
 
@@ -66,13 +71,13 @@ struct TrainingView: View {
                     .frame(height: 52)
                     .background(
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(engine.isRunning ? Color.clear : ZenPalette.gold)
+                            .fill(engine.isRunning ? Color.clear : zen.gold)
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(engine.isRunning ? ZenPalette.danger : Color.clear, lineWidth: 2)
+                            .stroke(engine.isRunning ? zen.danger : Color.clear, lineWidth: 2)
                     )
-                    .foregroundColor(engine.isRunning ? ZenPalette.danger : ZenPalette.backgroundDeep)
+                    .foregroundColor(engine.isRunning ? zen.danger : zen.backgroundDeep)
             }
         }
         .zenCard()
@@ -84,16 +89,16 @@ struct TrainingView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("SESSION SETTINGS")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(ZenPalette.textMuted)
+                .foregroundColor(zen.textMuted)
                 .tracking(1)
 
             Stepper(value: bindingInt(keyPath: \.inhaleSeconds, range: 1...20), in: 1...20) {
                 HStack {
                     Text("Inhale")
-                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.textPrimary)
+                        .foregroundColor(engine.isRunning ? zen.textMuted : zen.textPrimary)
                     Spacer()
                     Text("\(settingsStore.settings.inhaleSeconds)s")
-                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.gold)
+                        .foregroundColor(engine.isRunning ? zen.textMuted : zen.gold)
                 }
             }
             .disabled(engine.isRunning)
@@ -102,10 +107,10 @@ struct TrainingView: View {
             Stepper(value: bindingInt(keyPath: \.exhaleSeconds, range: 1...20), in: 1...20) {
                 HStack {
                     Text("Exhale")
-                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.textPrimary)
+                        .foregroundColor(engine.isRunning ? zen.textMuted : zen.textPrimary)
                     Spacer()
                     Text("\(settingsStore.settings.exhaleSeconds)s")
-                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.gold)
+                        .foregroundColor(engine.isRunning ? zen.textMuted : zen.gold)
                 }
             }
             .disabled(engine.isRunning)
@@ -114,10 +119,10 @@ struct TrainingView: View {
             Stepper(value: bindingInt(keyPath: \.groupDurationMinutes, range: 1...10), in: 1...10) {
                 HStack {
                     Text("Minutes")
-                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.textPrimary)
+                        .foregroundColor(engine.isRunning ? zen.textMuted : zen.textPrimary)
                     Spacer()
                     Text("\(settingsStore.settings.groupDurationMinutes)m")
-                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.gold)
+                        .foregroundColor(engine.isRunning ? zen.textMuted : zen.gold)
                 }
             }
             .disabled(engine.isRunning)
@@ -126,10 +131,10 @@ struct TrainingView: View {
             Stepper(value: bindingInt(keyPath: \.groupCount, range: 1...10), in: 1...10) {
                 HStack {
                     Text("Groups")
-                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.textPrimary)
+                        .foregroundColor(engine.isRunning ? zen.textMuted : zen.textPrimary)
                     Spacer()
                     Text("\(settingsStore.settings.groupCount)")
-                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.gold)
+                        .foregroundColor(engine.isRunning ? zen.textMuted : zen.gold)
                 }
             }
             .disabled(engine.isRunning)
@@ -144,19 +149,19 @@ struct TrainingView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("REMINDERS")
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(ZenPalette.textMuted)
+                .foregroundColor(zen.textMuted)
                 .tracking(1)
 
             HStack {
                 Text("Sound Profile")
-                    .foregroundColor(ZenPalette.textPrimary)
+                    .foregroundColor(zen.textPrimary)
                 Spacer()
                 Text(settingsStore.settings.soundProfile.displayName)
-                    .foregroundColor(ZenPalette.textSecondary)
+                    .foregroundColor(zen.textSecondary)
             }
 
             Toggle("Haptics", isOn: bindingBool(keyPath: \.hapticsEnabled))
-                .tint(ZenPalette.gold)
+                .tint(zen.gold)
                 .disabled(engine.isRunning)
         }
         .zenCard()
