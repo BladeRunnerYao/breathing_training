@@ -7,76 +7,114 @@ struct LogView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                CalmBackground()
+                ZenBackground()
                 ScrollView {
                     VStack(spacing: 16) {
                         monthHeader
                         CalendarMonthView(selectedDate: $selectedDate)
-                            .softCard()
+                            .zenCard()
                         logList
                     }
-                    .padding()
+                    .padding(20)
                 }
             }
             .navigationTitle("Training Log")
+            .toolbarColorScheme(.dark, for: .navigationBar)
         }
     }
+
+    // MARK: - Month Navigation
 
     private var monthHeader: some View {
         HStack {
             Button(action: { shiftMonth(by: -1) }) {
                 Image(systemName: "chevron.left")
+                    .foregroundColor(ZenPalette.gold)
+                    .font(.system(size: 18, weight: .medium))
             }
             Spacer()
             Text(monthTitle(for: selectedDate))
-                .font(.custom("Avenir Next", size: 20))
+                .font(.system(size: 20, weight: .medium, design: .rounded))
+                .foregroundColor(ZenPalette.textPrimary)
             Spacer()
             Button(action: { shiftMonth(by: 1) }) {
                 Image(systemName: "chevron.right")
+                    .foregroundColor(ZenPalette.gold)
+                    .font(.system(size: 18, weight: .medium))
             }
         }
         .padding(.horizontal, 4)
     }
 
+    // MARK: - Session List
+
     private var logList: some View {
         let logs = logStore.logs(on: selectedDate)
-        return VStack(alignment: .leading, spacing: 8) {
-            Text("Logs on \(dateTitle(selectedDate))")
-                .font(.custom("Avenir Next", size: 18))
+        return VStack(alignment: .leading, spacing: 12) {
+            Text("Sessions on \(dateTitle(selectedDate))")
+                .font(.system(size: 18, weight: .medium, design: .rounded))
+                .foregroundColor(ZenPalette.textPrimary)
 
             if logs.isEmpty {
-                Text("No training records")
-                    .foregroundColor(.secondary)
+                VStack(spacing: 12) {
+                    Image(systemName: "figure.mind.and.body")
+                        .font(.system(size: 36))
+                        .foregroundColor(ZenPalette.textMuted)
+                    Text("No sessions recorded")
+                        .font(.system(size: 16, design: .rounded))
+                        .foregroundColor(ZenPalette.textMuted)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 32)
             } else {
                 ForEach(logs) { log in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Duration: \(formatDuration(log.durationSeconds))")
-                        Text("Inhale \(log.inhaleSeconds)s / Exhale \(log.exhaleSeconds)s")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text("Groups: \(log.groupCount)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    HStack(spacing: 0) {
+                        // Left accent border
+                        Rectangle()
+                            .fill(ZenPalette.gold)
+                            .frame(width: 3)
+                            .cornerRadius(1.5)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Duration: \(formatDuration(log.durationSeconds))")
+                                .font(.system(size: 16, design: .rounded))
+                                .foregroundColor(ZenPalette.textPrimary)
+                            Text("Inhale \(log.inhaleSeconds)s / Exhale \(log.exhaleSeconds)s")
+                                .font(.system(size: 13, design: .rounded))
+                                .foregroundColor(ZenPalette.textSecondary)
+                            Text("Groups: \(log.groupCount)")
+                                .font(.system(size: 13, design: .rounded))
+                                .foregroundColor(ZenPalette.textSecondary)
+                        }
+                        .padding(.leading, 12)
+                        .padding(.vertical, 12)
                     }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(.secondarySystemBackground)))
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(ZenPalette.backgroundSurface.opacity(0.7))
+                    )
                     .contextMenu {
-                        Button("Delete") {
+                        Button(role: .destructive) {
                             logStore.delete(log: log)
+                        } label: {
+                            Label("Delete", systemImage: "trash")
                         }
                     }
                 }
             }
 
-            Button("Delete All Logs") {
+            Button(role: .destructive) {
                 logStore.deleteAll()
+            } label: {
+                Text("Delete All Logs")
+                    .font(.system(size: 15, design: .rounded))
+                    .foregroundColor(ZenPalette.danger)
             }
-            .foregroundColor(.red)
             .padding(.top, 8)
         }
-        .softCard()
     }
+
+    // MARK: - Helpers
 
     private func shiftMonth(by value: Int) {
         if let newDate = Calendar.current.date(byAdding: .month, value: value, to: selectedDate) {

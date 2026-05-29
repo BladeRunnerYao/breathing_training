@@ -61,7 +61,7 @@ struct BreathSettings: Codable, Equatable {
         groupDurationMinutes: 5,
         soundProfile: .singingBowl,
         hapticsEnabled: true,
-        theme: .system
+        theme: .dark
     )
 }
 

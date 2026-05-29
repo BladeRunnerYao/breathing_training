@@ -18,6 +18,7 @@ struct RootView: View {
                     Label("Settings", systemImage: "gearshape")
                 }
         }
-        .tint(CalmPalette.accent)
+        .tint(ZenPalette.gold)
+        .preferredColorScheme(.dark)
     }
 }

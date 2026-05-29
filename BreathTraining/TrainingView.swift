@@ -8,192 +8,161 @@ struct TrainingView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                CalmBackground()
+                ZenBackground()
                 ScrollView {
-                    VStack(spacing: 18) {
+                    VStack(spacing: 16) {
                         heroCard
-                        statusCard
                         controlsCard
                         soundCard
-                        actionCard
                     }
-                    .padding()
+                    .padding(20)
                 }
             }
             .navigationTitle("Breath Training")
+            .toolbarColorScheme(.dark, for: .navigationBar)
         }
     }
 
+    // MARK: - Hero Card (Enso + Info + Button)
+
     private var heroCard: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill((engine.phase == .inhale ? CalmPalette.inhale : CalmPalette.exhale).opacity(0.18))
-                    .frame(width: 220, height: 220)
-                    .overlay(
-                        Circle()
-                            .stroke((engine.phase == .inhale ? CalmPalette.inhale : CalmPalette.exhale).opacity(0.35), lineWidth: 2)
-                    )
-                    .scaleEffect(engine.phase == .inhale ? 1.03 : 0.90)
-                    .animation(.easeInOut(duration: Double(phaseDuration)), value: engine.phase)
+        VStack(spacing: 24) {
+            EnsoBreathingView(
+                phase: engine.phase,
+                phaseRemaining: displayPhaseRemaining,
+                phaseDuration: phaseDuration
+            )
 
-                VStack(spacing: 6) {
-                    Text(engine.phase == .inhale ? "Inhale" : "Exhale")
-                        .font(.custom("Avenir Next", size: 28))
-                        .foregroundColor(CalmPalette.accent)
-                    Text(format(seconds: displayPhaseRemaining))
-                        .font(.custom("Avenir Next", size: 44))
-                        .foregroundColor(.primary)
-                }
-            }
-
+            // Session info row
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Session Remaining")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 13, design: .rounded))
+                        .foregroundColor(ZenPalette.textSecondary)
                     Text(formatLong(seconds: displaySessionRemaining))
-                        .font(.custom("Avenir Next", size: 20))
+                        .font(.system(size: 24, weight: .medium, design: .rounded))
+                        .foregroundColor(ZenPalette.textPrimary)
                 }
+                Spacer()
+                Rectangle()
+                    .fill(ZenPalette.divider)
+                    .frame(width: 1, height: 40)
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
                     Text("Group")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 13, design: .rounded))
+                        .foregroundColor(ZenPalette.textSecondary)
                     Text("\(displayGroupIndex)/\(max(1, settingsStore.settings.groupCount))")
-                        .font(.custom("Avenir Next", size: 20))
+                        .font(.system(size: 24, weight: .medium, design: .rounded))
+                        .foregroundColor(ZenPalette.textPrimary)
                 }
             }
 
+            // Start / Stop button
             Button(action: toggleSession) {
-                Text(engine.isRunning ? "Stop" : "Start Training")
+                Text(engine.isRunning ? "Stop" : "Begin")
+                    .font(.system(size: 17, weight: .semibold, design: .rounded))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(engine.isRunning ? Color.red : CalmPalette.accent)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .frame(height: 52)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(engine.isRunning ? Color.clear : ZenPalette.gold)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(engine.isRunning ? ZenPalette.danger : Color.clear, lineWidth: 2)
+                    )
+                    .foregroundColor(engine.isRunning ? ZenPalette.danger : ZenPalette.backgroundDeep)
             }
         }
-        .softCard()
+        .zenCard()
     }
 
-    private var statusCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(engine.isRunning ? "Running" : "Ready")
-                .font(.headline)
-
-            HStack {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Phase")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(engine.phase == .inhale ? "Inhale" : "Exhale")
-                        .font(.title2)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 6) {
-                    Text("Remaining")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text(format(seconds: engine.phaseRemaining))
-                        .font(.title2)
-                }
-            }
-
-            ProgressView(value: progressValue)
-        }
-        .softCard()
-    }
+    // MARK: - Session Settings
 
     private var controlsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Session Settings")
-                .font(.headline)
+            Text("SESSION SETTINGS")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(ZenPalette.textMuted)
+                .tracking(1)
 
             Stepper(value: bindingInt(keyPath: \.inhaleSeconds, range: 1...20), in: 1...20) {
                 HStack {
                     Text("Inhale")
+                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.textPrimary)
                     Spacer()
                     Text("\(settingsStore.settings.inhaleSeconds)s")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.gold)
                 }
             }
             .disabled(engine.isRunning)
+            .opacity(engine.isRunning ? 0.4 : 1.0)
 
             Stepper(value: bindingInt(keyPath: \.exhaleSeconds, range: 1...20), in: 1...20) {
                 HStack {
                     Text("Exhale")
+                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.textPrimary)
                     Spacer()
                     Text("\(settingsStore.settings.exhaleSeconds)s")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.gold)
                 }
             }
             .disabled(engine.isRunning)
+            .opacity(engine.isRunning ? 0.4 : 1.0)
 
             Stepper(value: bindingInt(keyPath: \.groupDurationMinutes, range: 1...10), in: 1...10) {
                 HStack {
-                    Text("Minutes per Group")
+                    Text("Minutes")
+                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.textPrimary)
                     Spacer()
                     Text("\(settingsStore.settings.groupDurationMinutes)m")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.gold)
                 }
             }
             .disabled(engine.isRunning)
+            .opacity(engine.isRunning ? 0.4 : 1.0)
 
             Stepper(value: bindingInt(keyPath: \.groupCount, range: 1...10), in: 1...10) {
                 HStack {
-                    Text("Group Count")
+                    Text("Groups")
+                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.textPrimary)
                     Spacer()
                     Text("\(settingsStore.settings.groupCount)")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(engine.isRunning ? ZenPalette.textMuted : ZenPalette.gold)
                 }
             }
             .disabled(engine.isRunning)
+            .opacity(engine.isRunning ? 0.4 : 1.0)
         }
-        .softCard()
+        .zenCard()
     }
+
+    // MARK: - Sound & Reminders
 
     private var soundCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Reminders")
-                .font(.headline)
+            Text("REMINDERS")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundColor(ZenPalette.textMuted)
+                .tracking(1)
 
             HStack {
                 Text("Sound Profile")
+                    .foregroundColor(ZenPalette.textPrimary)
                 Spacer()
                 Text(settingsStore.settings.soundProfile.displayName)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(ZenPalette.textSecondary)
             }
 
             Toggle("Haptics", isOn: bindingBool(keyPath: \.hapticsEnabled))
+                .tint(ZenPalette.gold)
                 .disabled(engine.isRunning)
         }
-        .softCard()
+        .zenCard()
     }
 
-    private var actionCard: some View {
-        VStack(spacing: 12) {
-            if engine.isRunning {
-                Text("Group \(engine.currentGroupIndex) / \(settingsStore.settings.groupCount)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-
-            Text("Use the Start button above to begin training.")
-                .font(.footnote)
-                .foregroundColor(.secondary)
-        }
-        .padding()
-    }
-
-    private var progressValue: Double {
-        guard engine.isRunning else { return 0.0 }
-        let total = max(1, settingsStore.settings.groupDurationMinutes) * 60
-        let remaining = max(0, engine.groupRemaining)
-        return 1.0 - (Double(remaining) / Double(total))
-    }
+    // MARK: - Actions
 
     private func toggleSession() {
         if engine.isRunning {
@@ -206,9 +175,7 @@ struct TrainingView: View {
         }
     }
 
-    private func format(seconds: Int) -> String {
-        return "\(seconds)s"
-    }
+    // MARK: - Formatting
 
     private func formatLong(seconds: Int) -> String {
         let minutes = seconds / 60
@@ -218,6 +185,8 @@ struct TrainingView: View {
         }
         return "\(rem)s"
     }
+
+    // MARK: - Display State
 
     private var displayPhaseRemaining: Int {
         if engine.isRunning {
@@ -248,6 +217,8 @@ struct TrainingView: View {
             return max(1, settingsStore.settings.exhaleSeconds)
         }
     }
+
+    // MARK: - Bindings
 
     private func bindingInt(keyPath: WritableKeyPath<BreathSettings, Int>, range: ClosedRange<Int>) -> Binding<Int> {
         Binding<Int>(

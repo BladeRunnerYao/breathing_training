@@ -6,27 +6,41 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                CalmBackground()
+                ZenBackground()
                 Form {
-                    Section(header: Text("Theme")) {
+                    Section {
                         Picker("Appearance", selection: bindingTheme) {
                             ForEach(AppTheme.allCases) { theme in
                                 Text(theme.displayName).tag(theme)
                             }
                         }
+                        .foregroundColor(ZenPalette.textPrimary)
+                    } header: {
+                        Text("THEME")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(ZenPalette.textMuted)
+                            .tracking(1)
                     }
 
-                    Section(header: Text("Preferences")) {
-                        Button("Reset Settings") {
+                    Section {
+                        Button(role: .destructive) {
                             settingsStore.reset()
+                        } label: {
+                            Text("Reset Settings")
                         }
-                        .foregroundColor(.red)
+                    } header: {
+                        Text("PREFERENCES")
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundColor(ZenPalette.textMuted)
+                            .tracking(1)
                     }
                 }
                 .scrollContentBackground(.hidden)
             }
             .navigationTitle("Settings")
+            .toolbarColorScheme(.dark, for: .navigationBar)
         }
+        .tint(ZenPalette.gold)
     }
 
     private var bindingTheme: Binding<AppTheme> {

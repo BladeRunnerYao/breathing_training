@@ -7,11 +7,11 @@ struct CalendarMonthView: View {
 
     var body: some View {
         let monthDates = daysInMonthGrid(for: selectedDate)
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7)) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
             ForEach(weekdaySymbols, id: \.self) { symbol in
                 Text(symbol)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+                    .font(.system(size: 12, weight: .medium, design: .rounded))
+                    .foregroundColor(ZenPalette.textMuted)
             }
 
             ForEach(monthDates, id: \.self) { date in
@@ -27,15 +27,22 @@ struct CalendarMonthView: View {
                 let hasLog = logStore.hasLogs(on: date)
                 VStack(spacing: 4) {
                     Text("\(calendar.component(.day, from: date))")
-                        .font(.callout)
+                        .font(.system(size: 16, design: .rounded))
+                        .foregroundColor(isSelected ? ZenPalette.gold : ZenPalette.textPrimary)
                         .frame(maxWidth: .infinity)
                     Circle()
-                        .fill(hasLog ? CalmPalette.accent : Color.clear)
-                        .frame(width: 6, height: 6)
+                        .fill(hasLog ? ZenPalette.gold : Color.clear)
+                        .frame(width: 5, height: 5)
                 }
-                .padding(6)
-                .background(isSelected ? CalmPalette.accent.opacity(0.18) : Color.clear)
-                .cornerRadius(8)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isSelected ? ZenPalette.gold.opacity(0.25) : Color.clear)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isSelected ? ZenPalette.gold : Color.clear, lineWidth: 1.5)
+                )
                 .onTapGesture {
                     selectedDate = date
                 }
